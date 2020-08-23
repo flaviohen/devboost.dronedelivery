@@ -33,7 +33,6 @@ namespace Devboost.DroneDelivery.Api.Controllers
               return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
 
             }
-
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Devboost.DroneDelivery.DomainService
             
             //calculoDistancia
 
-            var distancia = GeolocalizacaoService.CalcularDistanciaEmMetro(pedido.Latitude,pedido.Longitude);
+            var distancia = GeolocalizacaoService.CalcularDistanciaEmKm(pedido.Latitude,pedido.Longitude);
             
             if (!novoPedido.ValidaPedido(distancia))
                 return false;
@@ -40,6 +40,7 @@ namespace Devboost.DroneDelivery.DomainService
             if (drone == null)
             {
                 novoPedido.Status = PedidoStatus.PendenteEntrega;
+                novoPedido.DroneId = null;
                 await _pedidosRepository.Inserir(novoPedido);
                 return true;
             }

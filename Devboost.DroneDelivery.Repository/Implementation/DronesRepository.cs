@@ -43,7 +43,7 @@ namespace Devboost.DroneDelivery.Repository.Implementation
                     "SELECT * " +
                     "FROM dbo.Drone " +
                     "WHERE Status = @Status",
-                    new { Nome = status }
+                    new { Status = status }
                 );
 
                 return ConvertListModelToModelEntity(list.AsList());
@@ -62,7 +62,7 @@ namespace Devboost.DroneDelivery.Repository.Implementation
                     WHERE Id = @id
                 ";
 
-               await conexao.ExecuteAsync(query, new { drone.Status, dataAtualizacao, drone.Id }
+               await conexao.ExecuteAsync(query, new { drone.DescricaoStatus, dataAtualizacao, drone.Id }
               );
             }
         }
@@ -95,7 +95,7 @@ namespace Devboost.DroneDelivery.Repository.Implementation
             DroneEntity p = new DroneEntity()
             {
                 Id = drone.Id,
-                Status = (DroneStatus)drone.Status,
+                Status = RetornaStatus(drone.Status),
                 AutonomiaMinitos = drone.Autonomia,
                 CapacidadeGamas = drone.Capacidade,
                 VelocidadeKmH = drone.Velocidade,
@@ -106,62 +106,16 @@ namespace Devboost.DroneDelivery.Repository.Implementation
 
         }
 
-
-        //public IEnumerable<DroneModel> ObterTodos()
-        //{
-        //	using (SqlConnection conexao = new SqlConnection(
-        //		_configuracoes.GetConnectionString(_configConnectionString)))
-        //	{
-
-        //		var query = @"SELECT *
-        //	FROM Dbo.Jogador J
-        //	INNER JOIN Dbo.Posicao P ON J.IDPosicao = P.IDPosicao
-        //	INNER JOIN Dbo.Clube C ON J.IDClube = C.IDClube";
-
-        //		return conexao.Query<Jogador, Posicao, Clube, Jogador>(
-        //			  query,
-        //			  map: (jogador, posicao, clube) => {
-        //				  jogador.Posicao = posicao;
-        //				  jogador.Clube = clube;
-        //				  ;
-        //				  return jogador;
-        //			  },
-        //			  splitOn: "CPF,IDPosicao, IDClube"
-        //		);
-        //	}
-        //}
-
-        //public void Inserir(Jogador jogador)
-        //{
-        //	using (SqlConnection conexao = new SqlConnection(
-        //		_configuracoes.GetConnectionString(_configConnectionString)))
-        //	{
-
-        //		var query = @"INSERT INTO Dbo.Jogador		
-        //	VALUES(
-        //	@CPF,
-        //	@Nome,
-        //	@IDPosicao,
-        //	@IDClube
-        //	)";
-
-        //		conexao.Execute(query, new { jogador.CPF, jogador.Nome, jogador.Posicao.IDPosicao, jogador.Clube.IDClube }
-        //	  );
-        //	}
-        //}
-
-        //public Jogador ObterByName(string name)
-        //{
-        //	using (SqlConnection conexao = new SqlConnection(
-        //		_configuracoes.GetConnectionString(_configConnectionString)))
-        //	{
-        //		return conexao.QueryFirstOrDefault<Jogador>(
-        //			"SELECT * " +
-        //			"FROM dbo.Jogadores " +
-        //			"WHERE Nome = @Nome ",
-        //			new { Nome = name }
-        //		);
-        //	}
-        //}
+        private DroneStatus RetornaStatus(string descricaoStatus) 
+        {
+            DroneStatus status = DroneStatus.Carregando;
+            if (descricaoStatus == DroneStatus.Carregando.ToString())
+                 status = DroneStatus.Carregando;
+            if (descricaoStatus == DroneStatus.EmTransito.ToString())
+                 status = DroneStatus.EmTransito;
+            if (descricaoStatus == DroneStatus.Pronto.ToString())
+                status = DroneStatus.Pronto;
+            return status;
+        }
     }
 }

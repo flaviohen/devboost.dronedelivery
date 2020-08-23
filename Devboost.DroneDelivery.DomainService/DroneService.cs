@@ -60,9 +60,13 @@ namespace Devboost.DroneDelivery.DomainService
           await _dronesRepository.Atualizar(drone);
         }
 
-        private void AtualizaStatusDrones(List<DroneEntity> lista)
+        private async void AtualizaStatusDrones(List<DroneEntity> lista)
         {
-            lista.ForEach(async (d) => await AtualizaStatusDrones(d));
+			//lista.ForEach(async (d) => await AtualizaStatusDrones(d));
+			foreach (var item in lista)
+			{
+                await AtualizaStatusDrones(item);
+			}
         }
         private async Task AtualizaStatusDrones(DroneEntity drone)
         {

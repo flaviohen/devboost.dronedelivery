@@ -7,7 +7,7 @@ namespace Devboost.DroneDelivery.DomainService
     {
 	    public static readonly double LATITUDE_INICIAL = -23.5880684;
 	    public static readonly double LONGITUDE_INICIAL = -46.6564195;
-		public static double CalcularDistanciaEmMetro(double latitudeFinal, double longitudeFinal)
+		public static double CalcularDistanciaEmKm(double latitudeFinal, double longitudeFinal)
 		{
 			GeoCoordinate saidaCoordenada = new GeoCoordinate();
 			saidaCoordenada.Latitude = LATITUDE_INICIAL;
@@ -18,7 +18,9 @@ namespace Devboost.DroneDelivery.DomainService
 			entradaCordenada.Longitude = longitudeFinal;
 
 			double distancia = saidaCoordenada.GetDistanceTo(entradaCordenada);
-			return distancia;
+
+			double distanciaEmKm = distancia / 1000;
+			return distanciaEmKm;
 		}
 	}
 }

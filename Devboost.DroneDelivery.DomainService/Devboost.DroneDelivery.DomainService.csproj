@@ -16,6 +16,8 @@
   <ItemGroup>
 
     <PackageReference Include="GeoCoordinate.NetCore" Version="1.0.0.1" />
+
+    <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.1016.290" />
   </ItemGroup>
 
   <ItemGroup>

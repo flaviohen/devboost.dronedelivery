@@ -12,8 +12,8 @@ using System.Threading.Tasks;
 
 namespace Devboost.DroneDelivery.Repository.Implementation
 {
-    public class PedidosRepository : IPedidosRepository
-    {
+	public class PedidosRepository : IPedidosRepository
+	{
 
 		protected readonly string _configConnectionString = "DroneDelivery";
 
@@ -29,109 +29,145 @@ namespace Devboost.DroneDelivery.Repository.Implementation
 				_configuracoes.GetConnectionString(_configConnectionString)))
 			{
 
-                var list = await conexao.GetAllAsync<Pedido>();
+				var list = await conexao.GetAllAsync<Pedido>();
 
-                return ConvertListModelToModelEntity(list.AsList());
+				return ConvertListModelToModelEntity(list.AsList());
 			}
 		}
 
-        public async Task<PedidoEntity> GetByDroneID(int droneID)
-        {
-            using (SqlConnection conexao = new SqlConnection(
-                _configuracoes.GetConnectionString(_configConnectionString)))
-            {
-                var p = await conexao.QuerySingleAsync<Pedido>(
-                    @"SELECT *
+		public async Task<PedidoEntity> GetByDroneID(int droneID)
+		{
+			try
+			{
+				using (SqlConnection conexao = new SqlConnection(
+					_configuracoes.GetConnectionString(_configConnectionString)))
+				{
+					var p = await conexao.QueryFirstOrDefaultAsync<Pedido>(
+						@"SELECT *
                     FROM dbo.Pedido
                     WHERE DroneId = @droneID
                     AND Status = 'PendenteEntrega' ",
-                    new { Nome = droneID }
-                );
+						new { DroneId = droneID }
+					);
 
-                return ConvertModelToModelEntity(p);
-            }
-        }
+					return ConvertModelToModelEntity(p);
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new Exception(ex.Message);
+			}
+		}
 
-        public async Task Inserir(PedidoEntity pedido)
-        {
-            using (SqlConnection conexao = new SqlConnection(
-                _configuracoes.GetConnectionString(_configConnectionString)))
-            {
+		public async Task Inserir(PedidoEntity pedido)
+		{
+			try
+			{
+				using (SqlConnection conexao = new SqlConnection(
+					_configuracoes.GetConnectionString(_configConnectionString)))
+				{
 
-				var Id = Guid.NewGuid();
+					var Id = Guid.NewGuid();
 
-				var query = @"INSERT INTO Dbo.Pedido(id, peso, latitude, longitude, datahora, droneId)		
+					var query = @"INSERT INTO Dbo.Pedido(Id, Peso, LatLong, Latitude, Longitude, Datahora, Status, DroneId)		
 				VALUES(
 				@Id,
 				@Peso,
+				@LatLong,
 				@Latitude,
 				@Longitude,
 				@DataHora,
+				@Status,
 				@DroneId
 				)";
 
-                await conexao.ExecuteAsync(query, new { Id, pedido.PesoGramas, pedido.Latitude, pedido.Longitude, pedido.DataHora, pedido.DroneId }
-              );
-            }
-        }
+					await conexao.ExecuteAsync(query, new { Id = Id, Peso = pedido.PesoGramas, LatLong = pedido.LatLong, Latitude = pedido.Latitude, Longitude = pedido.Longitude, DataHora = pedido.DataHora, Status = pedido.DescricaoStatus, DroneId = pedido.DroneId }
+				  );
+				}
+			}
+			catch (Exception ex)
+			{
+				throw new Exception(ex.Message);
+			}
+		}
 
-        public async Task Atualizar(PedidoEntity pedido)
-        {
-            using (SqlConnection conexao = new SqlConnection(
-                _configuracoes.GetConnectionString(_configConnectionString)))
-            {
-                var dataAtualizacao = DateTime.Now;
+		public async Task Atualizar(PedidoEntity pedido)
+		{
+			using (SqlConnection conexao = new SqlConnection(
+				_configuracoes.GetConnectionString(_configConnectionString)))
+			{
+				var dataAtualizacao = DateTime.Now;
 
-                var query = @"UPDATE Dbo.Pedido		
+				var query = @"UPDATE Dbo.Pedido		
 			        SET Status = @status, DataHora = @DataHora
                     WHERE Id = @id
                 ";
 
-                await conexao.ExecuteAsync(query, new { pedido.Status, pedido.DataHora }
-              );
-            }
-        }
+				await conexao.ExecuteAsync(query, new { pedido.DescricaoStatus, pedido.DataHora }
+			  );
+			}
+		}
 
-        public async Task Incluir(PedidoEntity pedido)
-        {
-            using (SqlConnection conexao = new SqlConnection(
-                _configuracoes.GetConnectionString(_configConnectionString)))
-            {
-                await conexao.InsertAsync<PedidoEntity>(pedido);
-            }
-        }
+		public async Task Incluir(PedidoEntity pedido)
+		{
+			using (SqlConnection conexao = new SqlConnection(
+				_configuracoes.GetConnectionString(_configConnectionString)))
+			{
+				await conexao.InsertAsync<PedidoEntity>(pedido);
+			}
+		}
 
 
-        protected List<PedidoEntity> ConvertListModelToModelEntity(List<Pedido> listPedido)
-        {
+		protected List<PedidoEntity> ConvertListModelToModelEntity(List<Pedido> listPedido)
+		{
 
-            List<PedidoEntity> newListD = new List<PedidoEntity>();
+			List<PedidoEntity> newListD = new List<PedidoEntity>();
 
-            foreach (var item in listPedido)
-            {
-                newListD.Add(ConvertModelToModelEntity(item));
-            }
-            return newListD;
+			foreach (var item in listPedido)
+			{
+				newListD.Add(ConvertModelToModelEntity(item));
+			}
+			return newListD;
 
-        }
+		}
 
-        protected PedidoEntity ConvertModelToModelEntity(Pedido pedido)
-        {
+		protected PedidoEntity ConvertModelToModelEntity(Pedido pedido)
+		{
+			if (pedido != null)
+			{
+				PedidoEntity p = new PedidoEntity()
+				{
+					Id = pedido.Id,
+					Status = RetornaPedidoStatus(pedido.Status),
+					DroneId = pedido.DroneId,
+					DataHora = pedido.DataHora,
+					Latitude = pedido.Latitude,
+					Longitude = pedido.Longitude,
+					PesoGramas = pedido.Peso
+				};
+				return p;
+			}
+			else 
+			{
+				return null;
+			}
+			
 
-            PedidoEntity p = new PedidoEntity()
-            {
-                Id = pedido.Id,
-                Status = (PedidoStatus)pedido.Status,
-                DroneId = pedido.DroneId,
-                DataHora = pedido.DataHora,
-                Latitude = pedido.Latitude,
-                Longitude = pedido.Longitude,
-                PesoGramas = pedido.Peso
-            };
-            
-            return p;
+			
 
-        }
+		}
 
-    }
+		private PedidoStatus RetornaPedidoStatus(string descricaoStatus)
+		{
+			PedidoStatus status = PedidoStatus.Entregue;
+			if (descricaoStatus == PedidoStatus.Entregue.ToString())
+				status = PedidoStatus.Entregue;
+			if (descricaoStatus == PedidoStatus.EmTransito.ToString())
+				status = PedidoStatus.EmTransito;
+			if (descricaoStatus == PedidoStatus.PendenteEntrega.ToString())
+				status = PedidoStatus.PendenteEntrega;
+			return status;
+		}
+
+	}
 }

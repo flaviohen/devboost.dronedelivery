@@ -11,7 +11,7 @@ namespace Devboost.DroneDelivery.Repository.Models
         public int Capacidade { get; set; }
         public int Velocidade { get; set; }
         public int Autonomia { get; set; }
-        public int Status { get; set; }
+        public string Status { get; set; }
         public int Carga { get; set; }
         public DateTime DataAtualizacao { get; set; }
     }
